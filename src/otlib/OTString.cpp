@@ -148,6 +148,12 @@
 #include <wordexp.h>
 #endif
 
+std::ostream & operator << (std::ostream & os, const OTString & obj)
+{
+    os << obj.Get();
+    return os;
+}
+
 
 /*
  int32_t vsnprintf(char *str, size_t size, const char *format, va_list ap);
@@ -724,7 +730,7 @@ int64_t OTString::ToLong() const
     if (!*end) return lNumber;
     else
     {
-        OTLog::sError("Conversion error (str to int64_t), non-convertible part: %s",end);
+        OTLog::vError("Conversion error (str to int64_t), non-convertible part: %s",end);
         OT_FAIL;
         return -1;
     }

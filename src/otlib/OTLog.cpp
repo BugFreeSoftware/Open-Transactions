@@ -132,12 +132,19 @@
 
 #include "stdafx.hpp"
 
+#define OTLOG_IMPORT
+
 #include "OTLog.hpp"
 
+#include "OTSettings.hpp"
 #include "OTPaths.hpp"
+#include "OTAssert.hpp"
 
 #include "tinythread.hpp"
 
+#ifndef _WIN32
+#include <cerrno>
+#endif
 //#include <exception>
 #include <fstream>
 #include <iostream>
@@ -262,6 +269,34 @@ const OTString OTLog::m_strVersion		 = OT_VERSION;
 const OTString OTLog::m_strPathSeparator = "/";
 
 
+OTLOG_IMPORT OTLogStream otErr(-1);   // logs using OTLog::vError()
+OTLOG_IMPORT OTLogStream otInfo(2);  // logs using OTLog::vOutput(2)
+OTLOG_IMPORT OTLogStream otOut(0);   // logs using OTLog::vOutput(0)
+OTLOG_IMPORT OTLogStream otWarn(1);  // logs using OTLog::vOutput(1)
+
+
+OTLogStream::OTLogStream(int _logLevel)
+    : std::ostream(this)
+    , logLevel(_logLevel)
+{
+}
+
+int OTLogStream::overflow(int c)
+{
+    char str[2];
+    str[0] = (char) c;
+    str[1] = '\0';
+    if (logLevel < 0)
+    {
+        OTLog::Error(str);
+        return 0;
+    }
+
+    OTLog::Output(logLevel, str);
+    return 0;
+}
+
+
 // Global, thread local.
 //static thread_local OTLog * OTLog::pLogger;
 
@@ -333,9 +368,7 @@ bool OTLog::Init(const OTString & strThreadContext, const int32_t & nLogLevel)
 //static
 bool OTLog::IsInitialized()
 {
-	if (NULL == pLogger)
-		return false;
-	else return pLogger->m_bInitialized;
+	return NULL != pLogger && pLogger->m_bInitialized;
 }
 
 
@@ -348,15 +381,14 @@ bool OTLog::Cleanup()
 			pLogger = NULL;
 			return true;
 	}
-	else return false;
+	return false;
 }
 
 
 //static
 bool OTLog::CheckLogger(OTLog * pLogger)
 {
-    if (NULL != pLogger)
-    if (pLogger->m_bInitialized) return true;
+    if (NULL != pLogger && pLogger->m_bInitialized) return true;
 
     OT_FAIL;
 }
@@ -714,21 +746,6 @@ void OTLog::Output(int32_t nVerbosity, const char *szOutput)
 }
 
 
-void OTLog::Output(int32_t nVerbosity, OTString & strOutput)
-{
-	bool bHaveLogger(false);
-	if (NULL != pLogger)
-		if (pLogger->IsInitialized())
-			bHaveLogger = true;
-
-	// lets check if we are Initialized in this context
-	if (bHaveLogger) CheckLogger(OTLog::pLogger);
-
-	if (strOutput.Exists())
-		OTLog::Output(nVerbosity, strOutput.Get());
-}
-
-
 // the vOutput is to avoid name conflicts.
 void OTLog::vOutput(int32_t nVerbosity, const char *szOutput, ...)
 {
@@ -823,13 +840,6 @@ void OTLog::Error(const char *szError)
 }
 
 
-void OTLog::Error(OTString & strError)
-{
-	if (strError.Exists())
-		OTLog::Error(strError.Get());
-}
-
-
 // NOTE: if you have problems compiling on certain platforms, due to the use
 // of errno, then just use preprocessor directives to carve those portions out
 // of this function, replacing with a message about the unavailability of errno.
@@ -874,90 +884,6 @@ void OTLog::Errno(const char * szLocation/*=NULL*/) // stderr
 		szFunc, sz_location,
 		errnum);
 }
-
-
-void OTLog::sOutput(int32_t nVerbosity,const OTString & strOne)
-	{
-		OTLog::vOutput(nVerbosity,strOne.Get());
-	}
-
-
-void OTLog::sOutput(int32_t nVerbosity,const OTString & strOne, const OTString & strTwo)
-	{
-		OTLog::vOutput(nVerbosity,strOne.Get(),strTwo.Get());
-	}
-
-
-void OTLog::sOutput(int32_t nVerbosity,const OTString & strOne, const OTString & strTwo, const OTString & strThree)
-	{
-		OTLog::vOutput(nVerbosity,strOne.Get(),strTwo.Get(),strThree.Get());
-	}
-
-
-void OTLog::sOutput(int32_t nVerbosity,const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour)
-	{
-		OTLog::vOutput(nVerbosity,strOne.Get(),strTwo.Get(),strThree.Get(),strFour.Get());
-	}
-
-
-void OTLog::sOutput(int32_t nVerbosity,const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive)
-	{
-		OTLog::vOutput(nVerbosity,strOne.Get(),strTwo.Get(),strThree.Get(),strFour.Get(),strFive.Get());
-	}
-
-
-void OTLog::sOutput(int32_t nVerbosity, const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive, const OTString & strSix)
-	{
-		OTLog::vOutput(nVerbosity,strOne.Get(),strTwo.Get(),strThree.Get(),strFour.Get(),strFive.Get(),strSix.Get());
-	}
-
-
-void OTLog::sOutput(int32_t nVerbosity, const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive, const OTString & strSix, const OTString & strSeven)
-	{
-		OTLog::vOutput(nVerbosity,strOne.Get(),strTwo.Get(),strThree.Get(),strFour.Get(),strFive.Get(),strSix.Get(),strSeven.Get());
-	}
-
-
-void OTLog::sError(const OTString & strOne)
-	{
-		OTLog::vError(strOne.Get());
-	}
-
-
-void OTLog::sError(const OTString & strOne, const OTString & strTwo)
-	{
-		OTLog::vError(strOne.Get(),strTwo.Get());
-	}
-
-
-void OTLog::sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree)
-	{
-		OTLog::vError(strOne.Get(),strTwo.Get(),strThree.Get());
-	}
-
-
-void OTLog::sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour)
-	{
-		OTLog::vError(strOne.Get(),strTwo.Get(),strThree.Get(),strFour.Get());
-	}
-
-
-void OTLog::sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive)
-	{
-		OTLog::vError(strOne.Get(),strTwo.Get(),strThree.Get(),strFour.Get(),strFive.Get());
-	}
-
-
-void OTLog::sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive, const OTString & strSix)
-	{
-		OTLog::vError(strOne.Get(),strTwo.Get(),strThree.Get(),strFour.Get(),strFive.Get(),strSix.Get());
-	}
-
-
-void OTLog::sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive, const OTString & strSix, const OTString & strSeven)
-	{
-		OTLog::vError(strOne.Get(),strTwo.Get(),strThree.Get(),strFour.Get(),strFive.Get(),strSeven.Get());
-	}
 
 
 // String Helpers
