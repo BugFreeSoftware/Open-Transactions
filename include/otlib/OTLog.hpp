@@ -137,7 +137,8 @@
 #include "OTString.hpp"
 
 #include <deque>
-
+#include <ostream>
+#include <streambuf>
 
 #if defined(unix) || defined(__unix__) || defined(__unix) || defined(__APPLE__) || defined(linux) || defined(__linux) || defined(__linux__)
 #define PREDEF_PLATFORM_UNIX 1
@@ -147,7 +148,33 @@
 #define PREDEF_MODE_DEBUG 1
 #endif
 
-EXPORT typedef std::deque <OTString *> dequeOfStrings;
+typedef std::deque <OTString *> dequeOfStrings;
+
+class OTLogStream;
+
+#ifdef OTLOG_IMPORT
+#undef OTLOG_IMPORT
+#define OTLOG_IMPORT __declspec(dllexport)
+#else
+#define OTLOG_IMPORT __declspec(dllimport)
+#endif
+
+OTLOG_IMPORT extern OTLogStream otErr;   // logs using OTLog::vError()
+OTLOG_IMPORT extern OTLogStream otInfo;  // logs using OTLog::vOutput(2)
+OTLOG_IMPORT extern OTLogStream otOut;   // logs using OTLog::vOutput(0)
+OTLOG_IMPORT extern OTLogStream otWarn;  // logs using OTLog::vOutput(1)
+
+
+class OTLogStream : public std::ostream, std::streambuf
+{
+private:
+    int logLevel;
+
+public:
+    OTLogStream(int _logLevel);
+
+    virtual int overflow(int c);
+};
 
 
 class OTLog
@@ -176,6 +203,8 @@ private:
     // (Don't call this directly. Use the above #defined macro instead.)
     static OTAssert::fpt_Assert_sz_n_sz(logAssert);
 
+    static bool CheckLogger(OTLog * pLogger);
+
 public:
 
 	//EXPORT static OTLog & It();
@@ -186,8 +215,6 @@ public:
 	EXPORT static bool IsInitialized();
 
 	EXPORT static bool Cleanup();
-
-    EXPORT static inline bool CheckLogger(OTLog * pLogger);
 
 	// ------------------------------------------------------------
 	// OTLog Constants.
@@ -246,32 +273,14 @@ public:
 	// really want to see EVERYTHING.)
 
 	EXPORT static void Output(int32_t nVerbosity, const char * szOutput); // stdout
-	EXPORT static void Output(int32_t nVerbosity, OTString & strOutput); // stdout
 	EXPORT static void vOutput(int32_t nVerbosity, const char *szOutput, ...);
-
-	EXPORT static void sOutput(int32_t nVerbosity, const OTString & strOne);
-	EXPORT static void sOutput(int32_t nVerbosity, const OTString & strOne, const OTString & strTwo);
-	EXPORT static void sOutput(int32_t nVerbosity, const OTString & strOne, const OTString & strTwo, const OTString & strThree);
-	EXPORT static void sOutput(int32_t nVerbosity, const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour);
-	EXPORT static void sOutput(int32_t nVerbosity, const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive);
-	EXPORT static void sOutput(int32_t nVerbosity, const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive, const OTString & strSix);
-	EXPORT static void sOutput(int32_t nVerbosity, const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive, const OTString & strSix, const OTString & strSeven);
 
 	// This logs an error condition, which usually means bad input from the user, or a file wouldn't open,
 	// or something like that. This contrasted with Assert() which should NEVER actually happen. The software
 	// expects bad user input from time to time. But it never expects a loaded mint to have a NULL pointer.
 	// The bad input would log with Error(), whereas the NULL pointer would log with Assert();
 	EXPORT static void Error(const char * szError); // stderr
-	EXPORT static void Error(OTString & strError); // stderr
 	EXPORT static void vError(const char * szError, ...); // stderr
-
-	EXPORT static void sError(const OTString & strOne);
-	EXPORT static void sError(const OTString & strOne, const OTString & strTwo);
-	EXPORT static void sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree);
-	EXPORT static void sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour);
-	EXPORT static void sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive);
-	EXPORT static void sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive, const OTString & strSix);
-	EXPORT static void sError(const OTString & strOne, const OTString & strTwo, const OTString & strThree, const OTString & strFour, const OTString & strFive, const OTString & strSix, const OTString & strSeven);
 
 	// This method will print out errno and its associated string.
 	// Optionally you can pass the location you are calling it from,

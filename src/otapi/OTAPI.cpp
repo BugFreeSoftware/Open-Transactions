@@ -213,14 +213,14 @@ OTAPI_Exec * OTAPI_Wrap::Exec()
 {
 	if (NULL == exec)
 	{
-		OTLog::sError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
+		OTLog::vError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
 		OT_FAIL;
 	}
 
 	OT_API * pOTAPI = exec->OTAPI();
 	if (NULL == pOTAPI || !pOTAPI->IsInitialized())
 	{
-		OTLog::sError("%s: Error: OT_API not Initialized!!\n", __FUNCTION__);
+		OTLog::vError("%s: Error: OT_API not Initialized!!\n", __FUNCTION__);
 		OT_FAIL;
 	}
 
@@ -236,7 +236,7 @@ bool OTAPI_Wrap::AppInit()
 {
 	if (NULL == exec)
 	{
-		OTLog::sError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
+		OTLog::vError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
 		OT_FAIL;
 	}
 
@@ -247,7 +247,7 @@ bool OTAPI_Wrap::AppCleanup()
 {
 	if (NULL == exec)
 	{
-		OTLog::sError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
+		OTLog::vError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
 		OT_FAIL;
 	}
 
@@ -270,7 +270,7 @@ void OTAPI_Wrap::SetAppBinaryFolder(const std::string & strFolder)
 {
     if (NULL == exec)
 	{
-		OTLog::sError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
+		OTLog::vError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
 		OT_FAIL;
 	}
     
@@ -295,7 +295,7 @@ void OTAPI_Wrap::SetHomeFolder(const std::string & strFolder)
 {
     if (NULL == exec)
 	{
-		OTLog::sError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
+		OTLog::vError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
 		OT_FAIL;
 	}
     
@@ -307,7 +307,7 @@ OT_API * OTAPI_Wrap::OTAPI()
 {
 	if (NULL == exec)
 	{
-		OTLog::sError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
+		OTLog::vError("%s: Error: OTAPI_Exec wrapper not found!!\n", __FUNCTION__);
 		OT_FAIL;
 	}
 

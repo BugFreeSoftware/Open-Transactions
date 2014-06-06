@@ -318,7 +318,8 @@ int ProcessCommand(OT_ME & madeEasy, AnyOption & opt)
             OTString strTemp;
             pServerContract->GetIdentifier(strTemp);
             str_Server = strTemp.Get();
-            OTLog::vOutput(0, "Using as server: %s\n", str_Server.c_str());
+            //OTLog::vOutput(0, "Using as server: %s\n", str_Server.c_str());
+            otOut << "Using as server: " << str_Server << std::endl;
         }
     }
     if (NULL == pServerContract)

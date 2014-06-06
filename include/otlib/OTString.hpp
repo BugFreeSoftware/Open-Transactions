@@ -142,6 +142,7 @@
 #include <cstdarg>
 #include <list>
 #include <map>
+#include <ostream>
 #include <sstream>
 
 #include <string.h>
@@ -188,6 +189,7 @@
 //#define MAX_STRING_LENGTH   1262144
 //#endif // _WIN32
 // TODO: consider how MAX_SIZE affects the above hard-coded number...
+
 
 class OTASCIIArmor;
 class OTContract;
@@ -309,6 +311,8 @@ class OTString
 {
    // Construction -- Destruction
 public:
+EXPORT	friend std::ostream & operator << (std::ostream & os, const OTString & obj);
+    
 EXPORT	OTString();
 EXPORT	OTString(const OTString & strValue);
 EXPORT	OTString(const OTASCIIArmor & strValue);
